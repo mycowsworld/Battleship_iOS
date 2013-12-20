@@ -283,115 +283,110 @@ in the Identity inspector, set the Custom Class to CustomCollectionView
 }
 ```
 
-
-
-
-
-
-
 ### High Scores
 I ended up using SQLite for storing high scores (an alternative would be to use Core Data, but I didn't investigate that path for enough).
 
+1. Add the following code to load the SQL database (or create one if the database cannot be found). For my project, this code was added to the application didFinishLaunchingWithOptions function in BattleshipAppDelegate.m
 
-BattlshipAppDelegate.m
-``` objective-c
-NSString* docsDir;
-NSArray* dirPaths;
-
-dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES); // get a list of directories that are owned by the application
-docsDir = dirPaths[0]; //
-self.databasePath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"scores.db"]]; // this is the expected path to where the database should live ('docsDir . "/scores.db/')
-
-NSFileManager *filemgr = [NSFileManager defaultManager]; // define filemanager. this is used to look up if a file exists or not
-
-// if database file doesn't exist, create it
-if ([filemgr fileExistsAtPath:self.databasePath] == NO) {
-    const char* dbPath = [self.databasePath UTF8String]; // convert pathname to UTF8 String
-    sqlite3* scoresDB; // stores pointer to high scores database
-    if (sqlite3_open(dbPath, &scoresDB) == SQLITE_OK) { // create a database at the specified path
-        char* errorMsg;
-        const char* sql_stmt = "CREATE TABLE IF NOT EXISTS SCORES (ID INTEGER PRIMARY KEY AUTOINCREMENT, BOARD INTEGER, MINUTES INTEGER, SECONDS INTEGER, RANK INTEGER);";
-
-        // create table in database
-        if (sqlite3_exec(scoresDB, sql_stmt, NULL, NULL, &errorMsg) != SQLITE_OK) {
-            //NSLog(@"Failed to create table");
+    ``` objective-c
+    NSArray* dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES); // get a list of directories that are owned by the application
+    NSString* docsDir = dirPaths[0]; // assume it's in the first directory
+    self.databasePath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"scores.db"]]; // this is the expected path to where the database should live ('docsDir . "/scores.db/')
+    NSFileManager *filemgr = [NSFileManager defaultManager]; // define filemanager. this is used to look up if a file exists or not
+    
+    // if database file doesn't exist, create it
+    if ([filemgr fileExistsAtPath:self.databasePath] == NO) {
+        const char* dbPath = [self.databasePath UTF8String]; // convert pathname to UTF8 String
+        sqlite3* scoresDB; // stores pointer to high scores database
+        
+        // create a database at the specified path
+        if (sqlite3_open(dbPath, &scoresDB) == SQLITE_OK) { 
+            char* errorMsg;
+            const char* sql_stmt = "CREATE TABLE IF NOT EXISTS SCORES (ID INTEGER PRIMARY KEY AUTOINCREMENT, BOARD INTEGER, MINUTES INTEGER, SECONDS INTEGER, RANK INTEGER);";
+    
+            // create table in database
+            if (sqlite3_exec(scoresDB, sql_stmt, NULL, NULL, &errorMsg) != SQLITE_OK) {
+                //NSLog(@"Failed to create table");
+            }
+    
+            sqlite3_close(scoresDB);
         }
+        else {
+            NSLog(@"Failed to open/create database");
+        }
+    }
+    
+    // self.databasePath will be used
+    ```
 
+2. Here's an example of using a SELECT statement. This was used in the High Scores View Controller to retrieve a list of levels that contained high scores. 
+
+    ``` objective-c
+    BattleshipAppDelegate* delegate = (BattleshipAppDelegate*) [[UIApplication sharedApplication] delegate];
+    const char* dbPath = [delegate.databasePath UTF8String]; // determined above
+    sqlite3* scoresDB;
+
+    // open the database
+    if (sqlite3_open(dbPath, &scoresDB) == SQLITE_OK) { 
+        NSString* query = [NSString stringWithFormat:@"SELECT DISTINCT BOARD FROM SCORES ORDER BY ID ASC"];
+        const char* query_stmt = [query UTF8String];
+    
+        // query database for all unique boards
+        sqlite3_stmt* statement;
+        if (sqlite3_prepare_v2(scoresDB, query_stmt, -1, &statement, NULL) == SQLITE_OK) {
+            // if at least one row returns
+            if (sqlite3_step(statement) == SQLITE_ROW) { // step through each returned row of data
+                do {
+                   NSNumber* board_id = [NSNumber numberWithInt:sqlite3_column_int(statement, 0)];
+                   //NSLog(@"BOARD ID: %@", board_id);
+                
+                   [boards addObject:board_id];
+                } while (sqlite3_step(statement) == SQLITE_ROW);
+            }
+    
+            sqlite3_finalize(statement); // release compiled statement from memory
+        }
+        else {
+            NSLog(@"Failed SQL PREPARE. Error is: %s", sqlite3_errmsg(scoresDB));
+        }
+    
+        // close database connection
         sqlite3_close(scoresDB);
     }
-    else {
-        NSLog(@"Failed to open/create database");
+    ```
+
+3. Here's an example of using a DELETE statement. This was used in the Settings View Controller to delete all the high scores from the database.
+
+    ``` objective-c
+    BattleshipAppDelegate* delegate = (BattleshipAppDelegate*) [[UIApplication sharedApplication] delegate];
+    const char* dbPath = [delegate.databasePath UTF8String];
+    sqlite3* scoresDB;
+    
+    // open high scores database
+    if (sqlite3_open(dbPath, &scoresDB) == SQLITE_OK) {
+        // generate command to delete all entries in database
+        NSString* query = [NSString stringWithFormat:@"DELETE FROM SCORES"];
+        const char* delete_stmt = [query UTF8String];
+        sqlite3_stmt* statement;
+    
+        // execute command
+        sqlite3_prepare_v2(scoresDB, delete_stmt, -1, &statement, NULL);
+    
+        // check results of execution
+        if (sqlite3_step(statement) == SQLITE_DONE) {
+            NSLog(@"Deleted");
+        }
+        else {
+            NSLog(@"Error: Deleting Score");
+        }
+    
+        // release compiled statement from memory
+        sqlite3_finalize(statement);
+    
+        // close database connection
+        sqlite3_close(scoresDB);
     }
-}
-// else use self.databasePath
-
-```
-
-SELECT example
-``` objective -c
-BattleshipAppDelegate* delegate = (BattleshipAppDelegate*) [[UIApplication sharedApplication] delegate];
-const char* dbPath = [delegate.databasePath UTF8String]; // determined above
-sqlite3* scoresDB;
-if (sqlite3_open(dbPath, &scoresDB) == SQLITE_OK) { // open the database
-    NSString* query = [NSString stringWithFormat:@"SELECT DISTINCT BOARD FROM SCORES ORDER BY ID ASC"];
-    const char* query_stmt = [query UTF8String];
-
-    // query database for all unique boards
-           if (sqlite3_prepare_v2(scoresDB, query_stmt, -1, &statement, NULL) == SQLITE_OK) {
-               // if at least one row returns
-               if (sqlite3_step(statement) == SQLITE_ROW) { // step through each returned row of data
-                   do {
-                       NSNumber* board_id = [NSNumber numberWithInt:sqlite3_column_int(statement, 0)];
-                       //NSLog(@"BOARD ID: %@", board_id);
-
-                       [boards addObject:board_id];
-                   } while (sqlite3_step(statement) == SQLITE_ROW);
-               }
-
-               sqlite3_finalize(statement); // release compiled statement from memory
-           }
-           else {
-               NSLog(@"Failed SQL PREPARE. Error is: %s", sqlite3_errmsg(scoresDB));
-           }
-
-           // close database connection
-           sqlite3_close(scoresDB);
-}
-
-sqlite3_stmt* statement;
-```
-
-DELETE Example
-``` objective-c
-BattleshipAppDelegate* delegate = (BattleshipAppDelegate*) [[UIApplication sharedApplication] delegate];
-const char* dbPath = [delegate.databasePath UTF8String];
-sqlite3_stmt* statement;
-sqlite3* scoresDB;
-
-// open high scores database
-if (sqlite3_open(dbPath, &scoresDB) == SQLITE_OK) {
-    // generate command to delete all entries in database
-    NSString* query = [NSString stringWithFormat:@"DELETE FROM SCORES"];
-    const char* delete_stmt = [query UTF8String];
-
-    // execute command
-    sqlite3_prepare_v2(scoresDB, delete_stmt, -1, &statement, NULL);
-
-    // check results of execution
-    if (sqlite3_step(statement) == SQLITE_DONE) {
-        NSLog(@"Deleted");
-    }
-    else {
-        NSLog(@"Error: Deleting Score");
-    }
-
-    // release compiled statement from memory
-    sqlite3_finalize(statement);
-
-    // close database connection
-    sqlite3_close(scoresDB);
-}
-```
+    ```
 
 ### Settings
 #### Storyboard
