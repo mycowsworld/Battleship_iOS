@@ -52,53 +52,58 @@ I then started to populate the Table View Controller. This View Controller is us
 8. In the storyboard, select the Table View Controller
 9. Select the <i>Identity</i> inspector in the right panel
 10. In the <i>Custom class</i> section, set <i>Class</i> to <b>LevelSelectViewController</b>
-    1. This was the class created above; the option should be available in the drop-down menu
+    1. This was the class created above. The option should be available in the drop-down menu
     2. This tells this View Controller to use LevelSelectViewController
-11. In LevelSelectViewController.m, I added some functionality in the viewDidLoad function, which is invoked once the view controller has finished loading the view
-       
-        ```objective-c
-        -(void)viewDidLoad {
-                [super viewDidLoad];
-        
-                NSString* file = [[NSBundle mainBundle] pathForResource:@"levels" ofType:@"txt"];
-                NSString* fileContents = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil];
-                NSArray* allLines = [fileContents componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-                
-                for (int i = 0; i < [allLines count]; i++) {
-                    // process text file...
-                }
-        }
-        ```
+11. Load the levels.txt file by adding the following code in LevelSelectViewController.m
+    1. viewDidLoad is invoked once the view controller has finished loading the view)
 
-13. When we created this ViewController, we selected that this class was a subclass of UITableViewController, so we'll need to implement those associated functions.
-    1. In MainStoryboard.storyboard, select the Prototype Cell in the Level Select View Controller object. In the Identity inspector, set Restoration ID to some name (I picked LevelCell)
+    ```objective-c
+    -(void)viewDidLoad {
+            [super viewDidLoad];
+    
+            NSString* file = [[NSBundle mainBundle] pathForResource:@"levels" ofType:@"txt"];
+            NSString* fileContents = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil];
+            NSArray* allLines = [fileContents componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+            
+            for (int i = 0; i < [allLines count]; i++) {
+                // process text file...
+            }
+    }
+    ```
+12. In MainStoryboard.storyboard, select the Prototype Cell (the lone entry in the table) in the LevelSelectViewController object. In the Identity inspector, set <i>Restoration ID</i> to some name (I picked <b>LevelCell</b>)
+13. In LevelSelectViewController.m, implement the associated UITableViewController functions. 
+    1. Since this class subclassed UITableViewController, the associated functions were already added to the .m file
 
-        - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-            // Return the number of sections
-            // only one section/group in table
-            return 1;
-        }
-        - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-            // Return the number of rows in the section.
-            return self.levels.count; // I stored all of the levels in an array
-        }
-        - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-            // populate table
-            Level* level = [self.levels objectAtIndex:indexPath.row];
-            static NSString* CellIdentifier = @"LevelCell"; // defined in StoryBoard (CustomCollectionView)
-            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
-        
-            // set cell parameters
-            cell.textLabel.text = [NSString stringWithFormat:@"Board %@ (%dx%d)",level.board_id, level.board_size,level.board_size];
-        
-            return cell;
-        }
+    ```objective-c
+    - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+        // Return the number of sections
+        // we only have one section/group in table
+        return 1;
+    }
+    - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+        // Return the number of rows in the section.
+        return self.levels.count; // I stored all of the levels in an array
+    }
+    - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+        // this function will be called for each row in the table
+
+        // populate table
+        Level* level = [self.levels objectAtIndex:indexPath.row];
+        static NSString* CellIdentifier = @"LevelCell"; // defined in StoryBoard (CustomCollectionView)
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+    
+        // set cell label
+        cell.textLabel.text = [NSString stringWithFormat:@"Board%@ (%dx%d)",level.board_id,level.board_size,level.board_size];
+    
+        return cell;
+    }
+    ```
 
 ### Game Screen
 To create the game board...
-I added a Collection View object to a new view controller.
-Click the prototype cell in the Collection View (the first tile), and added a Identifier in the Attributes inspector (similar to the Level Select screen). In this case, I named it GameTileCell
-
+1. Drag a Collection View object to a new view controller.
+2. Click the prototype cell in the Collection View (the first tile), and set an Identifier in the Attributes inspector (similar to the Level Select screen). In this case, I named it <b>GameTileCell</b>
+3. 
 custom collection view
 change behavior for when user interacts with this collection view (more specifically, when a user touches and drags over the game board, I wanted to send specific notifications to the BattleshipViewController)
 File -> New -> File -> iOS/Cocoa Touch -> Objective-C Class
@@ -388,88 +393,105 @@ if (sqlite3_open(dbPath, &scoresDB) == SQLITE_OK) {
 }
 ```
 
-
 ### Settings
 #### Storyboard
-Drag a new Table View Controller into the storyboard
-Select the view controller and navigate to the Attributes inspector
-Set <i>Content</i> to <i>Static Cells</i>. This means you will define how the cells look in storyboard rather than dynamically through code (like we did in the Level Select View Controller)
-Set Sections to how many logical groups of settings you want. In this case, I picked 2.
-You can add/remove cells from each group as you see fit. If you want to add more, drag a Table View Cell object into a particular group.
-To customize a cell, drag objects (e.g. labels, switch''es) onto each cell.
-By default, each cell is selectable (like a button). I left this behavior on the <i>Reset High Scores</i> option. However, I did not want this behavior on the Sound toggle option. Highlight the corresponding cell, navigate to the Attributes inspector, and set Selection to None.
+
+1. Drag a new <b>Table View Controller</b> into the storyboard
+2. Select the view controller and navigate to the <i>Attributes</i> inspector
+3. Set <i>Content</i> to <b>Static Cells</b>. 
+    1. This means you will define how the cells look in storyboard rather than dynamically through code (like we did in the Level Select View Controller)
+4. Set <i>Sections</i> to how many logical groups of settings you want. In this case, I picked <b>2</b>.
+5. You can add/remove cells from each group as you see fit. If you want to add more, drag a Table View Cell object into a particular group.
+6. To customize a cell, drag objects (e.g. labels, switches) onto each cell.
+7. By default, each cell is selectable (like a button). I left this behavior on the <i>Reset High Scores</i> option. However, I did not want this behavior on the Sound toggle option. Highlight the corresponding cell, navigate to the <i>Attributes</i> inspector, and set <i>Selection</i> to <b>None</b>.
+
 #### Code
-File -> New -> File -> iOS/Resource -> Property List
-Save As defaults
-Click Create
-Select defaults.plist in Project Navigator
-Right-click Root
-Click Add Row
-Name the property (I chose soundEnabled)
-Set the property type (I chose Boolean)
-Set the default value (I chose YES)
+1. File -> New -> File -> iOS/Resource -> <b>Property List</b>
+2. Save As <b>defaults</b>
+3. Click <b>Create</b>
+4. Select <b>defaults.plist</b> in <i>Project Navigator</i>
+5. Right-click <b>Root</b>
+6. Click <b>Add Row</b>
+7. Name the property (e.g. <b>soundEnabled</b>)
+8. Set the property type (e.g. <b>Boolean</b>)
+9. Set the default value (e.g. <b>YES</b>)
+10. In BattleshipAppDelegate.m, add the following statement to load the defaults.plist file once the application has finished loading.
+    
+    ``` objective-c
+    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+        //...
+        [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"defaults" ofType:@"plist"]]];
+        //...
+    }
+    ```
+    
+11. To access these values...
+    
+    ``` objective-c
+    NSUserDefaults* settings = [NSUserDefaults standardUserDefaults];
+    BOOL soundEnabled = [settings boolForKey:@"soundEnabled"];
+    ```
 
-In BattleshipAppDelegate.m, I added the following statement to load the defaults.plist file once the application has finished loading. It links the settings to standardUserDefaults.
-``` objective -c
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    //...
-    [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"defaults" ofType:@"plist"]]];
-    //...
-}
-```
+12. To change a value...
 
-To access these values...
-```
-NSUserDefaults* settings = [NSUserDefaults standardUserDefaults];
-BOOL soundEnabled = [settings boolForKey:@"soundEnabled"];
-```
-
-To save new values programmatically...
-```
-NSUserDefaults* settings = [NSUserDefaults standardUserDefaults];
-[settings setBool:true forKey:@"soundEnabled"];
-```
+    ``` objective-c
+    NSUserDefaults* settings = [NSUserDefaults standardUserDefaults];
+    [settings setBool:true forKey:@"soundEnabled"];
+    ```
 
 ### Alerts
-```objective - c
-- (void)showAlert {
-    UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Reset High Score?"
-        message:@"Are you sure you want to reset high scores?"
-        delegate:self // delegate set to self => this view controller will get a call back - need to implement the call back (see alertView didDismissWithButtonIndex)
-        cancelButtonTitle:@"Cancel"
-        otherButtonTitles:@"Yes",nil];
-    [alert setTag:1]; // alert ID
-    [alert show];
-}
+Alerts (pop-ups) were added to the game to confirm that a user wanted to proceed with a certain action. This was used in two places. The first was to confirm that a user wanted to reset all of the stored high scores. The second was to confirm that a user wanted to reset his/her progress on a current level. 
 
+1. To present the user with an alert, the following code was invoked after a user tapped a button
 
-- (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    // tag set above
-    if (alertView.tag == 1) {
-        // cancel
-        if (buttonIndex == 0) {
-        }
-        // OK
-        else if (buttonIndex != alertView.cancelButtonIndex) {
-            // do something
+    ```objective-c
+    - (void)showAlert {
+        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Reset High Score?"
+            message:@"Are you sure you want to reset high scores?"
+            delegate:self // delegate set to self => this view controller will get a callback - need to implement the callback (see alertView didDismissWithButtonIndex)
+            cancelButtonTitle:@"Cancel"
+            otherButtonTitles:@"Yes",nil]; // could add more buttons after "Yes". List of buttons ends in "nil".
+        [alert setTag:1]; // alert ID
+        [alert show];
+    }
+    ```
+    
+2. To react to the user's response to the pop-up, the following function was added
+    ```objective-c
+    - (void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+        // tag set above
+        if (alertView.tag == 1) {
+            // cancel
+            if (buttonIndex == 0) {
+            }
+            // OK
+            else if (buttonIndex != alertView.cancelButtonIndex) {
+                // do something
+            }
         }
     }
-}
-```
+    ```
 
 ### Sounds
-```objective-c
-NSString *soundPath = [[NSBundle mainBundle] pathForResource:@"ff6_victory" ofType:@"mp3"];
-NSURL* filePath = [NSURL fileURLWithPath:soundPath isDirectory:false];
-AVAudioPlayer* audioplayer = [[AVAudioPlayer alloc] initWithContentsOfURL:filePath error:nil];
-[audioplayer prepareToPlay];
-[self.soundplayers addObject:audioplayer];
+To add sounds to the game...
 
-AVAudioPlayer* player= [self.soundplayers objectAtIndex:2];
-[player stop];
-player= [self.soundplayers objectAtIndex:0];
-[player play];
+1. File -> Add Files to "Project"
+    2. Select an mp3 file (in this case, I added ff6_victory.mp3)
+2. Add the following code...
 
-```
-
-
+    ```objective-c
+    // load sounds
+    NSString* soundPath = [[NSBundle mainBundle] pathForResource:@"ff6_victory" ofType:@"mp3"];
+    NSURL* filePath = [NSURL fileURLWithPath:soundPath isDirectory:false];
+    AVAudioPlayer* audioplayer = [[AVAudioPlayer alloc] initWithContentsOfURL:filePath error:nil];
+    [audioplayer prepareToPlay];
+    [self.soundplayers addObject:audioplayer]; // all my sounds were added to this array
+    
+    // play sound
+    audioplayer = [self.soundplayers objectAtIndex:0];
+    [audioplayer play];
+    
+    // stop sound
+    audioplayer = [self.soundplayers objectAtIndex:0];
+    [audioplayer stop];
+    ```
