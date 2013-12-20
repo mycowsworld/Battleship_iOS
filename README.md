@@ -33,70 +33,71 @@ I first began by constructing the skeleton of the storyboard.
 6. Right-click the Button. Ctrl+click the circle in the <i>action</i> row, and drag to the Table View Controller. 
 7. In the resulting sub-menu, select Push.
   - <i>Push</i> "pushes" the next screen on top of the current. one. This will present the user twith a Back button to move back to the current screen
-  - <i>Modal</i> presents another screen that isn't "connected" to the current screen 
-8. 
-5. I then added a Button object onto View Controller (the first one). Right-clicking the Button brought up a menu, and in the <i>action</i> row, I ctrl+click+dragged the corresponding circle to the Table View Controller. Performing this action results in a sub-menu of choices. <i>Push</i> "pushes" the next screen on top of the current one. This also presents the user with a Back button to move back to the current screen. <i>Modal</i> just presents another screen that isn't "connected" to the current screen (like a pop-up). This (link)[http://stackoverflow.com/questions/9392744/difference-between-modal-and-push-segue-in-storyboards] describes it fairly well. In this case, I selected Push.
-5. I then repeated this for the other views that I wanted.
+  - <i>Modal</i> presents another screen that isn't "connected" to the current screen (like a pop-up)
+  - This [link](http://stackoverflow.com/questions/9392744/difference-between-modal-and-push-segue-in-storyboards) describes the differences fairly well
+8. Repeat this for other views
 
 ### Level Selection
-File -> New -> File -> iOS/Cocoa Touch -> Objective-C Class
-Set Class to LevelSelectViewController
-Set Subclass to UITableViewController
-Click Next
-Set destination to working directory
-Click Create
-In the storyboard, select the Table View Controller that was created earlier and click the black bar below the view controller.
-Select the Identity inspector in the Utilities panel (right-hand side)
-In the Custom class section, set Class to the class created above (the option should be available in the drop-down menu)
+I then started to populate the Table View Controller. This View Controller is used to populate a list of available levels in the game. 
 
-2. Added levels.txt to the project
-    1. File -> Add Files to "<Project>"
-    2. selected levels.txt
-3. In LevelSelectViewController.m, I added some functionality in the viewDidLoad function, which is invoked once the view controller has finished loading the view.
-``` objective-c
--(void)viewDidLoad {
-    [super viewDidLoad];
+1. Add levels.txt to the project
+    1. File -> Add Files to "Project"
+    2. Select levels.txt
+2. File -> New -> File -> iOS/Cocoa Touch -> <b>Objective-C Class</b>
+3. Set Class to <b>LevelSelectViewController</b>
+4. Set Subclass to <b>UITableViewController</b>
+5. Click <b>Next</b>
+6. Set Destination to your application's directory
+7. Click <b>Create</b>
+8. In the storyboard, select the Table View Controller
+9. Select the <i>Identity</i> inspector in the right panel
+10. In the <i>Custom class</i> section, set <i>Class</i> to <b>LevelSelectViewController</b>
+    1. This was the class created above; the option should be available in the drop-down menu
+    2. This tells this View Controller to use LevelSelectViewController
+11. In LevelSelectViewController.m, I added some functionality in the viewDidLoad function, which is invoked once the view controller has finished loading the view
+       
+        ```objective-c
+        -(void)viewDidLoad {
+                [super viewDidLoad];
+        
+                NSString* file = [[NSBundle mainBundle] pathForResource:@"levels" ofType:@"txt"];
+                NSString* fileContents = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil];
+                NSArray* allLines = [fileContents componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+                
+                for (int i = 0; i < [allLines count]; i++) {
+                    // process text file...
+                }
+        }
+        ```
 
-    NSString* file = [[NSBundle mainBundle] pathForResource:@"levels" ofType:@"txt"];
-    NSString* fileContents = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil];
-    NSArray* allLines = [fileContents componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-
-    for (int i = 0; i < [allLines count]; i++) {
-        // process text file...
-    }
-}
-```
-
-4. When we created this ViewController, we selected that this class was a subclass of UITableViewController, so we'll need to implement those associated functions.
+13. When we created this ViewController, we selected that this class was a subclass of UITableViewController, so we'll need to implement those associated functions.
     1. In MainStoryboard.storyboard, select the Prototype Cell in the Level Select View Controller object. In the Identity inspector, set Restoration ID to some name (I picked LevelCell)
-    2.
-``` objective-c
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    // Return the number of sections
-    // only one section/group in table
-    return 1;
-}
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    // Return the number of rows in the section.
-    return self.levels.count; // I stored all of the levels in an array
-}
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    // populate table
-    Level* level = [self.levels objectAtIndex:indexPath.row];
-    static NSString* CellIdentifier = @"LevelCell"; // defined in StoryBoard (CustomCollectionView)
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
 
-    // set cell parameters
-    cell.textLabel.text = [NSString stringWithFormat:@"Board %@ (%dx%d)",level.board_id, level.board_size,level.board_size];
-
-    return cell;
-}
+        - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+            // Return the number of sections
+            // only one section/group in table
+            return 1;
+        }
+        - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+            // Return the number of rows in the section.
+            return self.levels.count; // I stored all of the levels in an array
+        }
+        - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+            // populate table
+            Level* level = [self.levels objectAtIndex:indexPath.row];
+            static NSString* CellIdentifier = @"LevelCell"; // defined in StoryBoard (CustomCollectionView)
+            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+        
+            // set cell parameters
+            cell.textLabel.text = [NSString stringWithFormat:@"Board %@ (%dx%d)",level.board_id, level.board_size,level.board_size];
+        
+            return cell;
+        }
 
 ### Game Screen
 To create the game board...
 I added a Collection View object to a new view controller.
 Click the prototype cell in the Collection View (the first tile), and added a Identifier in the Attributes inspector (similar to the Level Select screen). In this case, I named it GameTileCell
-
 
 custom collection view
 change behavior for when user interacts with this collection view (more specifically, when a user touches and drags over the game board, I wanted to send specific notifications to the BattleshipViewController)
