@@ -371,3 +371,32 @@ To add sounds to the game...
     audioplayer = [self.soundplayers objectAtIndex:0];
     [audioplayer stop];
     ```
+
+## References
+### Storyboards
+
+- http://www.techotopia.com/index.php/Using_Xcode_Storyboarding_(iPhone_iOS_5)
+- http://kurrytran.blogspot.com/2011/07/simple-ios-5-tutorial-using-storyboard.html
+
+### UICollection
+
+- http://www.raywenderlich.com/22324/beginning-uicollectionview-in-ios-6-part-12
+- http://skeuo.com/uicollectionview-custom-layout-tutorial
+- http://www.appcoda.com/ios-programming-uicollectionview-tutorial/
+ 
+### Passing Data Between View Controllers
+
+- http://stackoverflow.com/questions/5210535/passing-data-between-view-controllers 
+
+### Reading Text File
+
+- http://stackoverflow.com/questions/7828073/reading-a-text-file-in-objective-c
+ 
+### NSUserDefaults
+
+- http://stackoverflow.com/questions/2076816/how-to-register-user-defaults-using-nsuserdefaults-without-overwriting-existing
+- http://stackoverflow.com/questions/9927094/ios-saving-high-score-locally
+
+### SQLite
+
+- http://www.techotopia.com/index.php/An_Example_SQLite_based_iOS_6_iPhone_Application
