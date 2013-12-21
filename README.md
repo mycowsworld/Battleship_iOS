@@ -100,43 +100,39 @@ I then started to populate the Table View Controller. This View Controller is us
     ```
 
 ### Game Screen
+#### Storyboard
 To create the game board...
+
 1. Drag a Collection View object to a new view controller.
 2. Click the prototype cell in the Collection View (the first tile), and set an Identifier in the Attributes inspector (similar to the Level Select screen). In this case, I named it <b>GameTileCell</b>
-3. 
-custom collection view
-change behavior for when user interacts with this collection view (more specifically, when a user touches and drags over the game board, I wanted to send specific notifications to the BattleshipViewController)
-File -> New -> File -> iOS/Cocoa Touch -> Objective-C Class
-Set Class to CustomCollectionView
-Set Subclass to UICollectionView
-Click Next
-Set destination to working directory
-Click Create
+3. Create a custom class for the Collection View 
+    1. File -> New -> File -> iOS/Cocoa Touch -> Objective-C Class
+    2. Set <i>Class</i> to <b>CustomCollectionView</b>
+    3. Set <i>Subclass</i> to <b>UICollectionView</b>
+    4. Click <b>Next</b>
+    5. Set destination to your application's directory
+    6. Click <b>Create</b>
+4. Click the Collection View object, navigate to the <i>Identity</i> inspector, and set the <i>Custom Class</i> to <b>CustomCollectionView</b>
 
-clicked the collection view
-in the Identity inspector, set the Custom Class to CustomCollectionView
+#### Code
 
-```objective-c
+1. Implement the following functions in the Game View Controller
+
+``` objective-c
 #pragma mark - UICollectionViewDataSource
-// =========================
-// UICollectionView DataSource
-// =========================
-// STEP 1: DETERMINE COLLECTIONVIEW SECTION
-// Returns the total number of sections
 - (NSInteger)numberOfSectionsInCollectionView: (UICollectionView *)collectionView {
+    // Returns the total number of sections
     // only have one section
     return 1;
 }
-// STEP 2: DETERMINE NUMBER OF CELLS IN SECTION
-// Returns the number of cells to be displayed for a given section
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
+    // Returns the number of cells to be displayed for a given section
     return self.tiles_count;
 }
-// STEP 3: LOOP THROUGH EACH CELL
-// Returns the cell at a given index
-// cells with tag 0: informational tile
-// cells with tag 1: game tile
 - (UICollectionViewCell *)collectionView:(UICollectionView *)cv cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    // Returns the cell at a given index
+    // cells with tag 0: informational tile
+    // cells with tag 1: game tile
     //NSLog(@"FOR %d", indexPath.item);
 
     // obtain a cell of ID "GameTileCell" (either new cell or one that can be reused)
@@ -166,7 +162,6 @@ in the Identity inspector, set the Custom Class to CustomCollectionView
             else {
                 [cell.button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
             }
-
 
             [self.goal_row_tiles addObject:cell];
         }
@@ -213,38 +208,8 @@ in the Identity inspector, set the Custom Class to CustomCollectionView
 
     return cell;
 }
-// Returns a view for either the header or footer for each section of the UICollectionView.
-// “kind” = header or footer
-/*- (UICollectionReusableView *)collectionView:
- (UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
- {
- return [[UICollectionReusableView alloc] init];
- }
-*/
-
-
-#pragma mark - UICollectionViewDelegate
-/*
-// =========================
-// UICollectionView Delegate
-// =========================
-// Select Item
-- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    //((GameTile *)collectionView).imageView.image = [UIImage imageNamed:@"error.png"];
-    //GameTile *cell = [self.game_tiles objectAtIndex:indexPath.item];
-    //cell.imageView.image = [UIImage imageNamed:@"error.png"];
-    //NSLog(@"SELECT %d, %d", cell.column, cell.row);
-}
-// Deselect Item (if allow for multiple selection)
-- (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath {
-    //NSLog(@"DESELECT %d", indexPath.item);
-}
-*/
 
 #pragma mark - UICollectionViewDelegateFlowLayout
-// =========================
-// UICollectionView Delegate
-// =========================
 // Specify size of a cell
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
     NSInteger row = indexPath.item / (self.brain.board_size+1);
