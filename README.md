@@ -70,6 +70,7 @@ I then started to populate the Table View Controller. This View Controller is us
             }
     }
     ```
+
 12. In MainStoryboard.storyboard, select the Prototype Cell (the lone entry in the table) in the LevelSelectViewController object. In the Identity inspector, set <i>Restoration ID</i> to some name (I picked <b>LevelCell</b>)
 13. In LevelSelectViewController.m, implement the associated UITableViewController functions. 
     1. Since this class subclassed UITableViewController, the associated functions were already added to the .m file
@@ -378,7 +379,7 @@ To add sounds to the game...
 - http://www.techotopia.com/index.php/Using_Xcode_Storyboarding_(iPhone_iOS_5)
 - http://kurrytran.blogspot.com/2011/07/simple-ios-5-tutorial-using-storyboard.html
 
-### UICollection
+### UICollection12.
 
 - http://www.raywenderlich.com/22324/beginning-uicollectionview-in-ios-6-part-12
 - http://skeuo.com/uicollectionview-custom-layout-tutorial
