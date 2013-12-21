@@ -116,13 +116,11 @@ To create the game board...
 
 #### Code
 
-1. Implement the following functions in the Game View Controller
-
 ``` objective-c
 #pragma mark - UICollectionViewDataSource
-- (NSInteger)numberOfSectionsInCollectionView: (UICollectionView *)collectionView {
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
     // Returns the total number of sections
-    // only have one section
+    // only one section
     return 1;
 }
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section {
@@ -137,75 +135,10 @@ To create the game board...
 
     // obtain a cell of ID "GameTileCell" (either new cell or one that can be reused)
     GameTile* cell = [cv dequeueReusableCellWithReuseIdentifier:@"GameTileCell" forIndexPath:indexPath];
-
-    // set cell parameters
-    NSInteger row = indexPath.item / (self.brain.board_size+1);
-    NSInteger column = indexPath.item % (self.brain.board_size+1);
-
-    // if first row, then set as goal_row
-    if (row == 0) {
-        // corner cell not used
-        if (column == self.brain.board_size) {
-            cell.button.userInteractionEnabled = false;
-            [cell.button setTag:0];
-            [cell.button setTitle:@"" forState:UIControlStateNormal];
-        }
-        // goal row
-        else {
-            cell.button.userInteractionEnabled = false; // disable touch event
-            [cell.button setTag:0];
-            [cell.button setTitle:[NSString stringWithFormat:@"%@", [self.brain.goal_row objectAtIndex:column]] forState:UIControlStateNormal];
-
-            if ([self.brain checkBoardColumn:column]) {
-                [cell.button setTitleColor:[UIColor colorWithWhite:0.7 alpha:0.3] forState:UIControlStateNormal];
-            }
-            else {
-                [cell.button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-            }
-
-            [self.goal_row_tiles addObject:cell];
-        }
-    }
-    // if last column, then set as goal_column
-    else if (column == self.brain.board_size) {
-        cell.button.userInteractionEnabled = false;
-        [cell.button setTag:0];
-        [cell.button setTitle:[NSString stringWithFormat:@"%@", [self.brain.goal_column objectAtIndex:row-1]] forState:UIControlStateNormal];
-
-        if ([self.brain checkBoardRow:row-1]) {
-            [cell.button setTitleColor:[UIColor colorWithWhite:0.7 alpha:0.3] forState:UIControlStateNormal];
-        }
-        else {
-            [cell.button setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-        }
-
-        [self.goal_column_tiles addObject:cell];
-    }
-    // else, set as game_tile
-    else {
-        cell.row = row-1;
-        cell.column = column;
-        [cell.button setTag:1];
-        if ([self.brain isTileHintAtX:column Y:row-1]) {
-            cell.button.userInteractionEnabled = false;
-            if ([self.brain getTileValueAtX:column Y:row-1] == WATER) {
-                [cell.button setImage:[UIImage imageNamed:@"water_hint.png"] forState:UIControlStateNormal];
-            }
-            else if ([self.brain getTileValueAtX:column Y:row-1] == SHIP) {
-                [cell.button setImage:[UIImage imageNamed:@"ship_hint.png"] forState:UIControlStateNormal];
-            }
-        }
-        else {
-            cell.button.userInteractionEnabled = false;
-            [cell.button setImage:[UIImage imageNamed:@"empty.png"] forState:UIControlStateNormal];
-            //[cell.button addTarget:self action:@selector(tilePressed:) forControlEvents:UIControlEventTouchUpInside]; // set tilePressed as touch handler
-        }
-
-        [[self.game_tiles objectAtIndex:column] addObject:cell];
-    }
-
+    
+    // set cell parameters...
+    
     //NSLog(@"FOR %d, %d", cell.row, cell.column);
-
     return cell;
 }
 
@@ -217,33 +150,16 @@ To create the game board...
 
     // calculate size of cell based on collectionview size
     CGRect frame = [self.board_layout frame];
-    NSInteger cell_size = (frame.size.height)/(self.brain.board_size+1);
-    CGSize retval;
-
-    // goal_row
-    if (row == 0) {
-        retval = CGSizeMake(cell_size, cell_size);
-        // corner cell
-        if (column == self.brain.board_size) {
-            retval = CGSizeMake(cell_size, cell_size);
-        }
-    }
-    // goal_column
-    else if (column == self.brain.board_size) {
-        retval = CGSizeMake(cell_size, cell_size);
-    }
-    // game_tiles
-    else {
-        retval = CGSizeMake(cell_size, cell_size);
-    }
+    NSInteger cellsize = (frame.size.height)/(self.brain.board_size+1);
+    CGSize retval = CGSizeMake(cellsize, cellsize);
+    
     //NSLog(@"ROW: %d, COL: %d, SIZE X: %f, SIZE Y: %f",row, column, retval.width, retval.height);
     //NSLog(@"WIDTH: %f HEIGHT: %f", frame.size.width, frame.size.height);
-
     return retval;
 }
 // Returns spacing between cells, headers, and footers
 - (UIEdgeInsets)collectionView:
-(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+(UICollectionView*)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
     return UIEdgeInsetsMake(0, 0, 0, 0);
 }
 ```
