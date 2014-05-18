@@ -166,7 +166,7 @@ To create the game board...
 ```
 
 ### High Scores
-I ended up using SQLite for storing high scores (an alternative would be to use Core Data, but I didn't investigate that path for enough).
+I ended up using SQLite for storing high scores (an alternative would be to use Core Data, but I didn't investigate that path enough).
 
 1. Add the following code to load the SQL database (or create one if the database cannot be found). For my project, this code was added to the application didFinishLaunchingWithOptions function in BattleshipAppDelegate.m
 
