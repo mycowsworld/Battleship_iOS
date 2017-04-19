@@ -14,7 +14,7 @@ The other caveat is that the ship tiles must fall under a set number of configur
 
 ## Documentation
 ### Breakpoints
-To start off, I added a breakpoint for all exceptions. This would allow errors to be picked up at the point at which they were thrown instead of catching the exception once it propogates all the way up the stack.
+To start off, I added a breakpoint for all exceptions. This would allow errors to be picked up at the point at which they were thrown instead of catching the exception once it propagates all the way up the stack.
 
 1. In the left panel, select the <b>Breakpoint Navigator</b>
 2. In the bottom left, click the '+' sign
